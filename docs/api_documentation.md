@@ -1,22 +1,23 @@
-# Updated Task Management API Documentation
+# Task Management API with clean architecture Documentation 
 
-This document provides comprehensive information about the Task Management API, which uses MongoDB for persistent data storage. The API now includes user authentication and authorization features, enabling role-based access control.
+This document provides comprehensive information about the Task Management API, which uses MongoDB for persistent data storage and follows Clean Architecture principles. The API includes user authentication and authorization features, enabling role-based access control.
 
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
 2. [Setup](#setup)
-3. [API Endpoints](#api-endpoints)
+3. [Project Structure](#project-structure)
+4. [API Endpoints](#api-endpoints)
    - [User Endpoints](#user-endpoints)
    - [Task Endpoints](#task-endpoints)
-4. [Data Models](#data-models)
+5. [Data Models](#data-models)
    - [User Model](#user-model)
    - [Task Model](#task-model)
-5. [Authentication & Authorization](#authentication--authorization)
-6. [Error Handling](#error-handling)
-7. [Testing the API](#testing-the-api)
-8. [MongoDB Inspection](#mongodb-inspection)
-9. [API Versioning](#api-versioning)
+6. [Authentication & Authorization](#authentication--authorization)
+7. [Error Handling](#error-handling)
+8. [Testing the API](#testing-the-api)
+9. [MongoDB Inspection](#mongodb-inspection)
+10. [API Versioning](#api-versioning)
 
 ---
 
@@ -48,13 +49,44 @@ This document provides comprehensive information about the Task Management API, 
    Navigate to the root directory of the application and execute:
 
    ```bash
-   go run main.go
+   go run Delivery/main.go
    ```
 
    The server will start on `http://localhost:8000`.
 
-## API Endpoints
+## Project Structure
 
+The project now follows Clean Architecture principles with the following structure:
+
+```
+task-manager/
+├── Delivery/
+│   ├── main.go
+│   ├── controllers/
+│   │   └── controller.go
+│   └── routers/
+│       └── router.go
+├── Domain/
+│   └── domain.go
+├── Infrastructure/
+│   ├── auth_middleware.go
+│   ├── jwt_service.go
+│   └── password_service.go
+├── Repositories/
+│   ├── task_repository.go
+│   └── user_repository.go
+└── Usecases/
+    ├── task_usecases.go
+    └── user_usecases.go
+```
+
+- **Delivery**: Contains the main application entry point, HTTP controllers, and routers.
+- **Domain**: Defines core business entities and interfaces.
+- **Infrastructure**: Implements external services and middleware.
+- **Repositories**: Handles data persistence and retrieval.
+- **Usecases**: Implements application-specific business logic.
+
+## API Endpoints
 ### User Endpoints
 
 1. **Register a New User**
@@ -206,10 +238,10 @@ This document provides comprehensive information about the Task Management API, 
 
 ```go
 type User struct {
-    ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-    Username string             `json:"username" bson:"username"`
-    Password string             `json:"password" bson:"password"`
-    Role     string             `json:"role" bson:"role"` // Possible values: "user", "admin"
+    ID       string `json:"id,omitempty" bson:"_id,omitempty"`
+    Username string `json:"username" bson:"username"`
+    Password string `json:"password" bson:"password"`
+    Role     string `json:"role" bson:"role"` // Possible values: "user", "admin"
 }
 ```
 
@@ -239,11 +271,11 @@ type Task struct {
   - **User**: Can view tasks.
   - **Admin**: Can create, update, delete tasks, and promote users.
 
-> **Note**: The `JWT_SECRET` environment variable is crucial for token generation and validation. Ensure it's securely stored and consistent across all instances of the application.
+The authentication and authorization logic is now handled in the `Infrastructure` layer, specifically in `auth_middleware.go` and `jwt_service.go`.
 
 ## Error Handling
 
-The API returns appropriate HTTP status codes and error messages in the response body when errors occur. Common error responses include:
+Error handling is now more consistent across the application due to the Clean Architecture approach. The API returns appropriate HTTP status codes and error messages in the response body when errors occur. Common error responses include:
 
 - **400 Bad Request**: For invalid input data.
 - **401 Unauthorized**: When authentication fails or the token is missing/invalid.
@@ -271,3 +303,7 @@ You can use [MongoDB Compass](https://www.mongodb.com/products/compass) to inspe
 ## API Versioning
 
 The current API version is `v1`. Future updates and changes may introduce new versions.
+
+---
+
+This updated documentation reflects the Clean Architecture structure of the refactored Task Management API. It highlights the new project structure and the separation of concerns between different layers of the application.

@@ -1,4 +1,4 @@
-module github.com/Hailemari/task_manager
+module github.com/Hailemari/clean_architecture_task_manager
 
 go 1.22.5
 
