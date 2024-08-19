@@ -1,12 +1,12 @@
 package repositories
 
 import (
-	"errors"
 	"context"
+	"errors"
 
 	"github.com/Hailemari/clean_architecture_task_manager/Domain"
-    
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -14,7 +14,7 @@ type MongoTaskRepository struct {
     collection *mongo.Collection
 }
 
-func NewMongoTaskRepository(collection *mongo.Collection) *MongoTaskRepository {
+func NewMongoTaskRepository(collection *mongo.Collection) domain.TaskRepository{
     return &MongoTaskRepository{collection: collection}
 }
 
@@ -41,9 +41,9 @@ func (r *MongoTaskRepository) GetTasks() ([]domain.Task, error) {
     return tasks, nil
 }
 
-func (r *MongoTaskRepository) GetTaskByID(id string) (domain.Task, bool, error) {
+func (r *MongoTaskRepository) GetTaskByID(id primitive.ObjectID) (domain.Task, bool, error) {
     var task domain.Task
-    err := r.collection.FindOne(context.TODO(), bson.D{{Key: "id", Value: id}}).Decode(&task)
+    err := r.collection.FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&task)
     if err != nil {
         if err == mongo.ErrNoDocuments {
             return task, false, nil
@@ -58,10 +58,10 @@ func (r *MongoTaskRepository) AddTask(task domain.Task) error {
     return err
 }
 
-func (r *MongoTaskRepository) UpdateTask(id string, task domain.Task) error {
+func (r *MongoTaskRepository) UpdateTask(id primitive.ObjectID, task domain.Task) error {
     result := r.collection.FindOneAndUpdate(
         context.TODO(),
-        bson.D{{Key: "id", Value: id}},
+        bson.D{{Key: "_id", Value: id}},
         bson.D{{Key: "$set", Value: task}},
     )
     if result.Err() != nil {
@@ -73,8 +73,8 @@ func (r *MongoTaskRepository) UpdateTask(id string, task domain.Task) error {
     return nil
 }
 
-func (r *MongoTaskRepository) DeleteTask(id string) error {
-    result, err := r.collection.DeleteOne(context.TODO(), bson.D{{Key: "id", Value: id}})
+func (r *MongoTaskRepository) DeleteTask(id primitive.ObjectID) error {
+    result, err := r.collection.DeleteOne(context.TODO(), bson.D{{Key: "_id", Value: id}})
     if err != nil {
         return err
     }

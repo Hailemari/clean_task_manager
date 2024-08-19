@@ -1,12 +1,15 @@
 package usecases
 
-import "github.com/Hailemari/clean_architecture_task_manager/Domain"
+import (
+    "errors"
+    "github.com/Hailemari/clean_architecture_task_manager/Domain"
+)
 
 type UserUseCase struct {
     repo domain.UserRepository
 }
 
-func NewUserUseCase(repo domain.UserRepository) *UserUseCase {
+func NewUserUseCase(repo domain.UserRepository) domain.UserUseCaseInterface {
     return &UserUseCase{repo: repo}
 }
 
@@ -25,5 +28,12 @@ func (uc *UserUseCase) GetUserByUsername(username string) (*domain.User, error) 
 }
 
 func (uc *UserUseCase) PromoteUser(username string) error {
+    user, err := uc.repo.GetUserByUsername(username)
+    if err != nil {
+        return err
+    }
+    if user.Role == "admin" {
+        return errors.New("user is already an admin")
+    }
     return uc.repo.PromoteUser(username)
 }

@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"errors"
+    "errors"
     "context"
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
@@ -12,7 +12,7 @@ type MongoUserRepository struct {
     collection *mongo.Collection
 }
 
-func NewMongoUserRepository(collection *mongo.Collection) *MongoUserRepository {
+func NewMongoUserRepository(collection *mongo.Collection) domain.UserRepository {
     return &MongoUserRepository{collection: collection}
 }
 

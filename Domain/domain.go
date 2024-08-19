@@ -3,28 +3,30 @@ package domain
 import (
     "time"
     "errors"
+    "github.com/gin-gonic/gin"
     "golang.org/x/crypto/bcrypt"
+    "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Task struct {
-    ID          string    `json:"id"`
-    Title       string    `json:"title"`
-    Description string    `json:"description"`
-    DueDate     time.Time `json:"due_date"`
-    Status      string    `json:"status"`
+    ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+    Title       string             `json:"title"`
+    Description string             `json:"description"`
+    DueDate     time.Time          `json:"due_date"`
+    Status      string             `json:"status"`
 }
 
 type User struct {
-    ID       string `json:"id" bson:"_id,omitempty"`
-    Username string `json:"username"`
-    Password string `json:"password"`
-    Role     string `json:"role"`
+    ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+    Username string             `json:"username"`
+    Password string             `json:"password"`
+    Role     string             `json:"role"`
 }
 
 var AllowedStatuses = []string{"pending", "in-progress", "completed"}
 
 func (t *Task) Validate() error {
-    if t.ID == "" {
+    if t.ID == primitive.NilObjectID {
         return errors.New("task ID cannot be empty")
     }
     if t.Title == "" {
@@ -76,14 +78,42 @@ func (u *User) ComparePassword(password string) error {
 
 type TaskRepository interface {
     GetTasks() ([]Task, error)
-    GetTaskByID(id string) (Task, bool, error)
+    GetTaskByID(id primitive.ObjectID) (Task, bool, error)
     AddTask(task Task) error
-    UpdateTask(id string, task Task) error
-    DeleteTask(id string) error
+    UpdateTask(id primitive.ObjectID, task Task) error
+    DeleteTask(id primitive.ObjectID) error
 }
 
 type UserRepository interface {
     CreateUser(user *User) error
     GetUserByUsername(username string) (*User, error)
     PromoteUser(username string) error
+}
+
+type TaskUseCaseInterface interface {
+    GetTasks() ([]Task, error)
+    GetTask(id primitive.ObjectID) (Task, bool, error)
+    AddTask(task Task) error
+    UpdateTask(id primitive.ObjectID, task Task) error
+    DeleteTask(id primitive.ObjectID) error
+}
+
+type UserUseCaseInterface interface {
+    CreateUser(user *User) error
+    GetUserByUsername(username string) (*User, error)
+    PromoteUser(username string) error
+}
+
+type TaskControllerInterface interface {
+    GetTasks(ctx *gin.Context)
+    GetTask(ctx *gin.Context)
+    AddTask(ctx *gin.Context)
+    UpdateTask(ctx *gin.Context)
+    DeleteTask(ctx *gin.Context)
+}
+
+type UserControllerInterface interface {
+    CreateUser(ctx *gin.Context)
+    LoginUser(ctx *gin.Context)
+    PromoteUser(ctx *gin.Context)
 }
